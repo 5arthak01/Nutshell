@@ -5,17 +5,64 @@
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
+
+#include <sys/utsname.h>
 
 #define MAX_INPUT_SIZE 4096
+#define MAX_HOSTNAME_SIZE 256 // according to SUSv2
 #define TOKEN_WHITESPACE " \t"
 
-void print_prompt()
+void replace_home_with_tilde(char *path, char *home_path)
 {
-    char *cwd = getcwd(NULL, 0);
+    /*
+    Replaces the absolute path of the 
+    home directory with a '~' in `path`
+    */
 
-    printf("<username@system_name:%s> ", cwd);
+    int len_path = strlen(path);
+    int len_home_path = strlen(home_path);
+
+    if (len_path >= len_home_path && strncmp(home_path, path, len_home_path) == 0)
+    {
+        // path contains home, so replacement
+        char *new_path = malloc(sizeof(char) * (len_path - len_home_path + 5));
+        new_path[0] = '~';
+        strcpy(new_path + 1, path + len_home_path);
+        strcpy(path, new_path);
+        free(new_path);
+    }
+}
+
+void print_prompt(char *home_path)
+{
+    /*
+    Prints shell prompt 
+    */
+
+    //get username
+    char hostname[MAX_HOSTNAME_SIZE];
+    if (gethostname(hostname, MAX_HOSTNAME_SIZE) == -1)
+    {
+        perror("Error when getting hostname");
+        exit(EXIT_FAILURE);
+    }
+
+    // get system name
+    struct utsname buf;
+    if (uname(&buf) == -1)
+    {
+        perror("Error in buffer while trying to retrieve system name");
+        exit(EXIT_FAILURE);
+    }
+
+    // get path
+    char *pwd_path = getcwd(NULL, 0);
+    replace_home_with_tilde(pwd_path, home_path);
+
+    printf("<%s@%s:%s> ", hostname, buf.sysname, pwd_path);
     fflush(stdout);
-    free(cwd);
+    free(pwd_path);
 }
 
 char *read_input()
@@ -87,6 +134,7 @@ void trim(char *str)
 int main()
 {
     char *input;
+    char *SHELL_HOME_PATH = getcwd(NULL, 0);
 
     while (1)
     {
@@ -101,7 +149,7 @@ int main()
         else if (pid == 0)
         {
             // inside child
-            print_prompt();
+            print_prompt(SHELL_HOME_PATH);
             input = read_input();
 
             printf("You entered %s\n", input);
@@ -133,6 +181,7 @@ int main()
         }
     }
     free(input);
+    free(SHELL_HOME_PATH);
 
     return 0;
 }
