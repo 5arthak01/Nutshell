@@ -41,7 +41,7 @@ void trim(char *str)
 
     for (cur = 0; cur < len; cur++)
     {
-        if (isspace(str[cur]))
+        if (!isspace(str[cur]))
         {
             break;
         }
@@ -64,7 +64,8 @@ void tokenise(char *str, char *delim, char **tokens, int *num_tokens)
     int i = 0;
     while (token)
     {
-        tokens[i++] = token;
+        tokens[i] = token;
+        i++;
         token = strtok(NULL, delim);
     }
 
