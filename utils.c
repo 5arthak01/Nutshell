@@ -1,10 +1,19 @@
 #include "includes.h"
 #include "constants.h"
 
-void read_input(char *input)
+// typedef struct command
+// {
+//     char **args;
+//     int num_args;
+//     char **internal_args;
+// } command;
+
+void read_input(char **input)
 {
-    ssize_t input_len = MAX_INPUT_SIZE;
-    if (getline(&input, &input_len, stdin) == -1)
+    *input = NULL;
+    size_t input_len = 0;
+
+    if (getline(input, &input_len, stdin) == -1)
     {
         if (!feof(stdin))
         {
@@ -13,6 +22,7 @@ void read_input(char *input)
             exit(EXIT_FAILURE);
         }
     }
+    *input[strlen(*input) - 1] = '\0';
 }
 
 void trim(char *str)
@@ -26,12 +36,12 @@ void trim(char *str)
     int cur; // iterator/cursor
     for (cur = len - 1; cur >= 0; cur--)
     {
-        if (isspace(str[cur]))
+        if (!isspace(str[cur]))
         {
             break;
         }
     }
-    if (cur != -1)
+    if (cur != -1 && cur != len - 1)
     {
         // trailing spaces were present
         str[cur] = '\0';
@@ -60,13 +70,16 @@ void tokenise(char *str, char *delim, char **tokens, int *num_tokens)
     Tokenises the string according to given delim
     and returns new array of string tokens.
     */
-    char *token = strtok(str, delim);
     int i = 0;
-    while (token)
+    if (str != NULL)
     {
-        tokens[i] = token;
-        i++;
-        token = strtok(NULL, delim);
+        char *token = strtok(str, delim);
+        while (token)
+        {
+            tokens[i] = token;
+            i++;
+            token = strtok(NULL, delim);
+        }
     }
 
     tokens[i] = NULL;

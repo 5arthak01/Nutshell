@@ -6,22 +6,36 @@
 
 int main()
 {
-    char *input = malloc(sizeof(char) * MAX_INPUT_SIZE);
+    char *input;
+    size_t input_len;
     char *SHELL_HOME_PATH = getcwd(NULL, 0);
-    int num_tokens;
 
     while (1)
     {
         print_prompt(SHELL_HOME_PATH);
-
-        read_input(input);
-
-        char *command = strtok(input, ";");
-        while (command)
+        input = NULL;
+        input_len = 0;
+        if (getline(&input, &input_len, stdin) == -1)
         {
-            execute(command);
-            // go to next command
-            command = strtok(NULL, ";");
+            if (!feof(stdin))
+            {
+                // getline not at EOF, so other error
+                perror("Error while taking input");
+                exit(EXIT_FAILURE);
+            }
+        }
+        input[strlen(input) - 1] = '\0';
+
+        // read_input(&input);
+        if (input)
+        {
+            char *command = strtok(input, ";");
+            while (command)
+            {
+                execute(command, SHELL_HOME_PATH);
+                // go to next command
+                command = strtok(NULL, ";");
+            }
         }
     }
 
