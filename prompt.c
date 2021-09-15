@@ -39,6 +39,9 @@ void print_prompt(char *home_path)
         perror("Error when getting hostname");
         exit(EXIT_FAILURE);
     }
+    // note:
+    // uname() can be used too, but the implementation
+    // on Linux just calls hostname under the hood
 
     // get path
     char *pwd_path = getcwd(NULL, 0);

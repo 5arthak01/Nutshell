@@ -1,10 +1,9 @@
 #include "includes.h"
 #include "constants.h"
 
-char *read_input()
+void read_input(char *input)
 {
     ssize_t input_len = MAX_INPUT_SIZE;
-    char *input = malloc(sizeof(char) * input_len);
     if (getline(&input, &input_len, stdin) == -1)
     {
         if (!feof(stdin))
@@ -14,13 +13,12 @@ char *read_input()
             exit(EXIT_FAILURE);
         }
     }
-    return input;
 }
 
 void trim(char *str)
 {
     /* 
-    Trims leading and trailing whitespaces
+    Trims leading and trailing whitespaces,
     modifies given string
     */
 
@@ -56,7 +54,7 @@ void trim(char *str)
     }
 }
 
-void tokenise(char *str, char *delim, char **tokens)
+void tokenise(char *str, char *delim, char **tokens, int *num_tokens)
 {
     /*
     Tokenises the string according to given delim
@@ -71,4 +69,5 @@ void tokenise(char *str, char *delim, char **tokens)
     }
 
     tokens[i] = NULL;
+    *num_tokens = i;
 }

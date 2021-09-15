@@ -5,9 +5,10 @@
 
 int main()
 {
-    char *input;
+    char *input = malloc(sizeof(char) * MAX_INPUT_SIZE);
     char *SHELL_HOME_PATH = getcwd(NULL, 0);
-    char **tokens = malloc(sizeof(char *) * MAX_ARGS_COUNT);
+    char **tokenised_input = malloc(sizeof(char *) * MAX_ARGS_COUNT);
+    int num_tokens;
 
     while (1)
     {
@@ -23,27 +24,18 @@ int main()
         {
             // inside child
             print_prompt(SHELL_HOME_PATH);
-            input = read_input();
 
-            printf("You entered %s\n", input);
+            read_input(input);
+            trim(input);
+            tokenise(input, WHITESPACE_TOKENS, tokenised_input, &num_tokens);
 
-            tokenise(input, WHITESPACE_TOKENS, tokens);
-
-            for (int i = 0;; i++)
+            if (execvp(tokenised_input[0], tokenised_input) == -1)
             {
-                if (tokens[i])
-                {
-                    printf(" %s\n", tokens[i]);
-                }
-                else
-                {
-                    break;
-                }
+                perror("Error ");
+                exit(EXIT_FAILURE);
             }
 
             exit(EXIT_SUCCESS);
-
-            // execvp()
         }
         else
         {
@@ -61,7 +53,7 @@ int main()
     }
     free(input);
     free(SHELL_HOME_PATH);
-    free(tokens);
+    free(tokenised_input);
 
     return 0;
 }
