@@ -5,4 +5,6 @@ char *read_input();
 
 void trim(char *str);
 
+void tokenise(char *str, char *delim, char **tokens);
+
 #endif

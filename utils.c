@@ -9,21 +9,10 @@ char *read_input()
     {
         if (!feof(stdin))
         {
-            // getline not at EOF, so error
+            // getline not at EOF, so other error
             perror("Error while taking input");
             exit(EXIT_FAILURE);
         }
-
-        // if (feof(stdin))
-        // {
-        //     // EOF reached
-        //     exit(EXIT_SUCCESS);
-        // }
-        // else
-        // {
-        //     perror("Error while taking input");
-        //     exit(EXIT_FAILURE);
-        // }
     }
     return input;
 }
@@ -31,7 +20,7 @@ char *read_input()
 void trim(char *str)
 {
     /* 
-    trims leading and trailing whitespaces
+    Trims leading and trailing whitespaces
     modifies given string
     */
 
@@ -65,4 +54,21 @@ void trim(char *str)
         // leading spaces were present
         memmove(str, str + cur, strlen(str));
     }
+}
+
+void tokenise(char *str, char *delim, char **tokens)
+{
+    /*
+    Tokenises the string according to given delim
+    and returns new array of string tokens.
+    */
+    char *token = strtok(str, delim);
+    int i = 0;
+    while (token)
+    {
+        tokens[i++] = token;
+        token = strtok(NULL, delim);
+    }
+
+    tokens[i] = NULL;
 }

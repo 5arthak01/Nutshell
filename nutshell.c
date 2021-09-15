@@ -7,6 +7,7 @@ int main()
 {
     char *input;
     char *SHELL_HOME_PATH = getcwd(NULL, 0);
+    char **tokens = malloc(sizeof(char *) * MAX_ARGS_COUNT);
 
     while (1)
     {
@@ -26,12 +27,18 @@ int main()
 
             printf("You entered %s\n", input);
 
-            char *token = strtok(input, TOKEN_WHITESPACE);
-            while (token)
-            {
-                printf("%s\n", token);
+            tokenise(input, WHITESPACE_TOKENS, tokens);
 
-                token = strtok(NULL, TOKEN_WHITESPACE);
+            for (int i = 0;; i++)
+            {
+                if (tokens[i])
+                {
+                    printf(" %s\n", tokens[i]);
+                }
+                else
+                {
+                    break;
+                }
             }
 
             exit(EXIT_SUCCESS);
@@ -54,6 +61,7 @@ int main()
     }
     free(input);
     free(SHELL_HOME_PATH);
+    free(tokens);
 
     return 0;
 }

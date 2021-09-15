@@ -1,6 +1,6 @@
 #include "includes.h"
 #include "constants.h"
-#include <sys/utsname.h>
+#include <pwd.h>
 
 void replace_home_with_tilde(char *path, char *home_path)
 {
@@ -30,6 +30,9 @@ void print_prompt(char *home_path)
     */
 
     //get username
+    char *username = getpwuid(getuid())->pw_name;
+
+    // get system name
     char hostname[MAX_HOSTNAME_SIZE];
     if (gethostname(hostname, MAX_HOSTNAME_SIZE) == -1)
     {
@@ -37,19 +40,11 @@ void print_prompt(char *home_path)
         exit(EXIT_FAILURE);
     }
 
-    // get system name
-    struct utsname sysinfo;
-    if (uname(&sysinfo) == -1)
-    {
-        perror("Error in buffer while trying to retrieve system name");
-        exit(EXIT_FAILURE);
-    }
-
     // get path
     char *pwd_path = getcwd(NULL, 0);
     replace_home_with_tilde(pwd_path, home_path);
 
-    printf("<%s@%s:%s> ", hostname, sysinfo.sysname, pwd_path);
+    printf("<%s@%s:%s> ", username, hostname, pwd_path);
     fflush(stdout);
     free(pwd_path);
 }
