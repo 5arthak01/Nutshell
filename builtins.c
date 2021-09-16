@@ -3,15 +3,18 @@
 #include "types.h"
 #include "cd.h"
 #include "getcwd.h"
+#include "echo.h"
 
 // refer NUM_BUILTINS in constants.h for size
 char *builtin_cmd_names[] = {
     "cd",
-    "pwd"};
+    "pwd",
+    "echo"};
 
 void (*builtin_cmds[])(command) = {
     &cd,
-    &pwd};
+    &pwd,
+    &echo};
 
 int get_builtin_id(char *func_name)
 {
