@@ -64,6 +64,7 @@ dkms.conf
 
 ### VisualStudioCode ###
 .vscode/*
+.vscode/
 *.code-workspace
 
 # Local History for Visual Studio Code
@@ -76,3 +77,4 @@ dkms.conf
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode
 nutshell
+temp

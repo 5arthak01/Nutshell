@@ -23,7 +23,7 @@ void execute(char *input_cmd, char *shell_home_path)
 
         if (id != -1)
         {
-            if (strcmp("cd", cmd.args[0]) == 0)
+            if (strcmp("cd", cmd.args[0]) == 0 || strcmp("ls", cmd.args[0]) == 0)
             {
                 cmd.internal_args = shell_home_path;
             }

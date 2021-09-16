@@ -8,24 +8,6 @@
 // working directory originally home
 char oldpwd[MAX_PATH_LEN] = "~";
 
-void replace_tilde_with_home(char *path, char *shell_home_path)
-{
-    /*
-    Convenience function to replace with "~"
-    with the absolute path of shell home if present.
-    */
-    if ('~' == path[0])
-    {
-        char temp[MAX_PATH_LEN];
-        // save the relative path, without "~"
-        strcpy(temp, path + 1);
-        // Store absolute path of shell home
-        strcpy(path, shell_home_path);
-        // Append relative path
-        strcat(path, temp);
-    }
-}
-
 void cd(command cmd)
 {
     int prev_dir_flag = 0;
@@ -42,7 +24,8 @@ void cd(command cmd)
         {
             // go to previous working directory
             strcpy(new_path, oldpwd);
-            prev_dir_flag = -1;
+            // set flag to print later
+            prev_dir_flag = 1;
         }
         else
         {
@@ -75,7 +58,7 @@ void cd(command cmd)
         strcpy(oldpwd, cwd);
     }
 
-    if (prev_dir_flag == -1)
+    if (prev_dir_flag)
     {
         // print absolute pathname of new
         // directory since "-" was used

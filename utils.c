@@ -17,10 +17,6 @@ void trim(char *str)
         {
             break;
         }
-    }
-    if (cur != -1 && cur != len - 1)
-    {
-        // trailing spaces were present
         str[cur] = '\0';
     }
 
@@ -61,6 +57,24 @@ void tokenise(char *str, char *delim, char **tokens, int *num_tokens)
 
     tokens[i] = NULL;
     *num_tokens = i;
+}
+
+void replace_tilde_with_home(char *path, char *shell_home_path)
+{
+    /*
+    Convenience function to replace "~"
+    with the absolute path of shell home (if present)
+    */
+    if ('~' == path[0])
+    {
+        char temp[MAX_PATH_LEN];
+        // save the relative path, without "~"
+        strcpy(temp, path + 1);
+        // Store absolute path of shell home
+        strcpy(path, shell_home_path);
+        // Append relative path
+        strcat(path, temp);
+    }
 }
 
 /*
