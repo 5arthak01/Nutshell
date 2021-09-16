@@ -1,29 +1,6 @@
 #include "includes.h"
 #include "constants.h"
-
-// typedef struct command
-// {
-//     char **args;
-//     int num_args;
-//     char **internal_args;
-// } command;
-
-void read_input(char **input)
-{
-    *input = NULL;
-    size_t input_len = 0;
-
-    if (getline(input, &input_len, stdin) == -1)
-    {
-        if (!feof(stdin))
-        {
-            // getline not at EOF, so other error
-            perror("Error while taking input");
-            exit(EXIT_FAILURE);
-        }
-    }
-    *input[strlen(*input) - 1] = '\0';
-}
+#include "types.h"
 
 void trim(char *str)
 {
@@ -67,8 +44,8 @@ void trim(char *str)
 void tokenise(char *str, char *delim, char **tokens, int *num_tokens)
 {
     /*
-    Tokenises the string according to given delim
-    and returns new array of string tokens.
+    Tokenises the string according to given `delim`
+    and stores them in array of strings `tokens`.
     */
     int i = 0;
     if (str != NULL)
@@ -85,3 +62,23 @@ void tokenise(char *str, char *delim, char **tokens, int *num_tokens)
     tokens[i] = NULL;
     *num_tokens = i;
 }
+
+/*
+// DEPRECATED
+void read_input(char **input)
+{
+    *input = NULL;
+    size_t input_len = 0;
+
+    if (getline(input, &input_len, stdin) == -1)
+    {
+        if (!feof(stdin))
+        {
+            // getline not at EOF, so other error
+            perror("Error while taking input");
+            exit(EXIT_FAILURE);
+        }
+    }
+    *input[strlen(*input) - 1] = '\0';
+}
+*/

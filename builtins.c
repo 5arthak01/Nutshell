@@ -1,14 +1,15 @@
 #include "includes.h"
 #include "constants.h"
+#include "types.h"
 #include "cd.h"
 #include "getcwd.h"
 
-// refer NUM_BUILTINS in constants.h
+// refer NUM_BUILTINS in constants.h for size
 char *builtin_cmd_names[] = {
     "cd",
     "pwd"};
 
-void (*builtin_cmds[])(char **) = {
+void (*builtin_cmds[])(command) = {
     &cd,
     &pwd};
 

@@ -1,6 +1,6 @@
 #ifndef __CD_H
 #define __CD_H
 
-void cd(char **);
+void cd(command cmd);
 
 #endif

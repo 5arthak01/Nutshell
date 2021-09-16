@@ -1,24 +1,33 @@
 
 #include "includes.h"
 #include "constants.h"
+#include "types.h"
 #include "utils.h"
 #include "builtins.h"
 
-void execute(char *command, char *shell_home_path)
+void execute(char *input_cmd, char *shell_home_path)
 {
-    trim(command);
+    trim(input_cmd);
 
-    char *tokenised_command[MAX_ARGS_COUNT];
-    int num_args = 0;
-    tokenise(command, WHITESPACE_TOKENS, tokenised_command, &num_args);
+    command cmd;
 
-    if (num_args > 0)
+    // char *tokenised_command[MAX_ARGS_COUNT];
+    // int num_args = 0;
+    // tokenise(input_cmd, WHITESPACE_TOKENS, tokenised_command, &num_args);
+
+    tokenise(input_cmd, WHITESPACE_TOKENS, cmd.args, &cmd.num_args);
+
+    if (cmd.num_args > 0)
     {
-        int id = get_builtin_id(tokenised_command[0]);
+        int id = get_builtin_id(cmd.args[0]);
 
         if (id != -1)
         {
-            builtin_cmds[id](tokenised_command);
+            if (strcmp("cd", cmd.args[0]) == 0)
+            {
+                cmd.internal_args = shell_home_path;
+            }
+            builtin_cmds[id](cmd);
         }
         else
         {
@@ -31,7 +40,7 @@ void execute(char *command, char *shell_home_path)
             }
             else if (pid == 0)
             {
-                if (execvp(tokenised_command[0], tokenised_command) == -1)
+                if (execvp(cmd.args[0], cmd.args) == -1)
                 {
                     perror("Error in executing command");
                     exit(EXIT_FAILURE);

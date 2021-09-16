@@ -9,9 +9,12 @@ void replace_home_with_tilde(char *path, char *home_path)
     home directory with a '~' in `path`
     */
 
+    // Not using strstr() since
+    // lengths are useful inside
+    // so saves O(m+n) computation
+
     int len_path = strlen(path);
     int len_home_path = strlen(home_path);
-
     if (len_path >= len_home_path && strncmp(home_path, path, len_home_path) == 0)
     {
         // path contains home, so replacement

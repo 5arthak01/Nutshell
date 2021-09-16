@@ -1,6 +1,6 @@
 #ifndef __EXECUTION_H
 #define __EXECUTION_H
 
-void execute(char *command, char *shell_home_path);
+void execute(char *input_cmd, char *shell_home_path);
 
 #endif

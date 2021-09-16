@@ -1,6 +1,6 @@
 #ifndef __GETCWD_H
 #define __GETCWD_H
 
-void pwd(char **command);
+void pwd(command cmd);
 
 #endif

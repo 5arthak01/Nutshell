@@ -1,27 +1,55 @@
 #include "includes.h"
+#include "types.h"
+#include "utils.h"
 #include "constants.h"
+#include "getcwd.h"
 
-char OLDPWD[MAX_PATH_LEN] = "~"; // originally at home
+// variable name same as BASH
+// working directory originally home
+char oldpwd[MAX_PATH_LEN] = "~";
 
-void cd(char **command)
+void replace_tilde_with_home(char *path, char *shell_home_path)
 {
-    int i = 0;
-    while (command[i])
+    /*
+    Convenience function to replace with "~"
+    with the absolute path of shell home if present.
+    */
+    if ('~' == path[0])
     {
-        i++;
+        char temp[MAX_PATH_LEN];
+        // save the relative path, without "~"
+        strcpy(temp, path + 1);
+        // Store absolute path of shell home
+        strcpy(path, shell_home_path);
+        // Append relative path
+        strcat(path, temp);
     }
+}
 
-    if (i == 1)
+void cd(command cmd)
+{
+    int prev_dir_flag = 0;
+    char new_path[MAX_PATH_LEN];
+    if (cmd.num_args == 1)
     {
-        chdir(command[1]);
+        // no path given, so
+        // go to `shell_home_path`
+        strcpy(new_path, cmd.internal_args);
     }
-    else if (i == 2)
+    else if (cmd.num_args == 2)
     {
-        if (chdir(command[1]) != 0)
+        if (strcmp(cmd.args[1], "-") == 0)
         {
-            perror("Error while changing directory");
-            exit(EXIT_FAILURE);
+            // go to previous working directory
+            strcpy(new_path, oldpwd);
+            prev_dir_flag = -1;
         }
+        else
+        {
+            strcpy(new_path, cmd.args[1]);
+        }
+
+        replace_tilde_with_home(new_path, cmd.internal_args);
     }
     else
     {
@@ -29,4 +57,30 @@ void cd(char **command)
         exit(EXIT_FAILURE);
         return;
     }
+
+    // store absolute path of present directory
+    char *cwd = getcwd(NULL, 0);
+
+    // change into new directory
+    if (chdir(new_path) != 0)
+    {
+        printf("%s\n", new_path);
+        perror("Error while changing directory");
+        free(cwd);
+        return;
+    }
+    else
+    {
+        // store previous directory path
+        strcpy(oldpwd, cwd);
+    }
+
+    if (prev_dir_flag == -1)
+    {
+        // print absolute pathname of new
+        // directory since "-" was used
+        pwd(cmd);
+    }
+
+    free(cwd);
 }

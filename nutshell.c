@@ -1,5 +1,6 @@
 #include "includes.h"
 #include "constants.h"
+#include "types.h"
 #include "prompt.h"
 #include "utils.h"
 #include "execution.h"
@@ -13,6 +14,8 @@ int main()
     while (1)
     {
         print_prompt(SHELL_HOME_PATH);
+
+        // read input
         input = NULL;
         input_len = 0;
         if (getline(&input, &input_len, stdin) == -1)
@@ -26,7 +29,7 @@ int main()
         }
         input[strlen(input) - 1] = '\0';
 
-        // read_input(&input);
+        // if non-null input received
         if (input)
         {
             char *command = strtok(input, ";");
