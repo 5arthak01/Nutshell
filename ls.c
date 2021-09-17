@@ -11,6 +11,8 @@
 #include <pwd.h>
 // for getgrgid
 #include <grp.h>
+// for modification time
+#include <time.h>
 
 typedef struct entry_data
 {
@@ -20,6 +22,7 @@ typedef struct entry_data
     char *owner;
     char *group;
     long int size;
+    char mtime[100];
 
 } entry_data;
 
@@ -121,6 +124,19 @@ void print_dir_contents(char *directory, int a_flag, int l_flag)
             print_data[i].group = getgrgid(st.st_gid)->gr_name;
             // size
             print_data[i].size = st.st_size;
+            // last modification time
+            int seconds_in_a_year = 365 * 24 * 60 * 60;
+            char time_format[50];
+            if (difftime(time(NULL), st.st_mtime) > (seconds_in_a_year / 2))
+            {
+                // last acessed over 6 months ago ("not recent")
+                strcpy(time_format, "%b %e %Y");
+            }
+            else
+            {
+                strcpy(time_format, "%b %e %R");
+            }
+            strftime(print_data[i].mtime, sizeof(print_data[i].mtime), time_format, localtime(&st.st_mtime));
         }
 
         // Print the number of blocks
@@ -130,12 +146,13 @@ void print_dir_contents(char *directory, int a_flag, int l_flag)
 
         for (int i = 0; i < num_entries; i++)
         {
-            printf("%s %lu %*s %*s %*ld %s\n",
+            printf("%s %lu %*s %*s %*ld %s %s\n",
                    print_data[i].permissions,
                    print_data[i].hardlinks,
                    5, print_data[i].owner,
                    5, print_data[i].group,
                    5, print_data[i].size,
+                   print_data[i].mtime,
                    entries[i]->d_name);
         }
 
