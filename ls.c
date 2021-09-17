@@ -67,11 +67,18 @@ void get_permissions(struct stat st, char *permissions)
 
 void print_dir_contents(char *directory, int a_flag, int l_flag)
 {
-    printf("%s:\n", directory);
+    printf("\n%s:\n", directory);
 
     // get directory contents
     struct dirent **entries;
     int num_entries = scandir(directory, &entries, a_flag ? NULL : filter_hidden_entries, alphasort);
+    // NOTE: Order will be different from BASH, as here alphasort
+    // applies strcoll, which is dependent locale.
+    // By default, LC_COLLATE is dependent on your location (thx ubuntu!)
+    // changing locale for desired behaviour from aplhasort is risky
+    // and sorting in the manner as BASH does seems unnecessary
+    // Also see: https://unix.stackexchange.com/questions/75341/specify-the-sort-order-with-lc-collate-so-lowercase-is-before-uppercase
+
     if ((num_entries == -1))
     {
         // scandir handles errors such as
@@ -112,48 +119,82 @@ void print_dir_contents(char *directory, int a_flag, int l_flag)
                 continue;
             }
 
-            // block size
+            // increase directory block size
             dir_blk_sz += st.st_blocks;
+
             // permissions
             get_permissions(st, print_data[i].permissions);
+
             // number of hardlinks
             print_data[i].hardlinks = st.st_nlink;
+
             // owner name
-            print_data[i].owner = getpwuid(st.st_uid)->pw_name;
+            struct passwd *pw = getpwuid(st.st_uid);
+            if (pw == NULL)
+            {
+                printf("Error for %s:\n", entries[i]->d_name);
+                print_data[i].valid = 0;
+                perror("");
+                continue;
+            }
+            // if name not available, use id
+            if (pw->pw_name && strlen(pw->pw_name) > 0)
+                print_data[i].owner = pw->pw_name;
+            else
+                sprintf(print_data[i].owner, "%u", pw->pw_uid);
+
             // group name
-            print_data[i].group = getgrgid(st.st_gid)->gr_name;
+            struct group *gr = getgrgid(st.st_gid);
+            if (gr == NULL)
+            {
+                printf("Error for %s:\n", entries[i]->d_name);
+                print_data[i].valid = 0;
+                perror("");
+                continue;
+            }
+            // if name not available, use id
+            if (gr->gr_name && strlen(gr->gr_name) > 0)
+                print_data[i].group = gr->gr_name;
+            else
+                sprintf(print_data[i].group, "%u", gr->gr_gid);
+
             // size
             print_data[i].size = st.st_size;
+
             // last modification time
             int seconds_in_a_year = 365 * 24 * 60 * 60;
             char time_format[50];
+            // show year by default, show time if
+            // last acessed under 6 months ago ("recent")
             if (difftime(time(NULL), st.st_mtime) > (seconds_in_a_year / 2))
-            {
-                // last acessed over 6 months ago ("not recent")
                 strcpy(time_format, "%b %e %Y");
-            }
             else
-            {
                 strcpy(time_format, "%b %e %R");
-            }
             strftime(print_data[i].mtime, sizeof(print_data[i].mtime), time_format, localtime(&st.st_mtime));
         }
 
-        // Print the number of blocks
+        // Print the total number of blocks
         // Note: this may not match with BASH, since the BLOCK_SIZE
         // is 1024 by default on it while in stat it is 512
         printf("total %llu\n", dir_blk_sz);
 
         for (int i = 0; i < num_entries; i++)
         {
-            printf("%s %lu %*s %*s %*ld %s %s\n",
-                   print_data[i].permissions,
-                   print_data[i].hardlinks,
-                   5, print_data[i].owner,
-                   5, print_data[i].group,
-                   5, print_data[i].size,
-                   print_data[i].mtime,
-                   entries[i]->d_name);
+            if (print_data[i].valid)
+            {
+                printf("%s %*lu %*s %*s %*ld %s %s\n",
+                       print_data[i].permissions,
+                       3, print_data[i].hardlinks,
+                       10, print_data[i].owner,
+                       10, print_data[i].group,
+                       10, print_data[i].size,
+                       print_data[i].mtime,
+                       entries[i]->d_name);
+            }
+            else
+            {
+                printf("? %s:\n", entries[i]->d_name);
+            }
         }
 
         free(print_data);
@@ -162,9 +203,8 @@ void print_dir_contents(char *directory, int a_flag, int l_flag)
     {
         for (int i = 0; i < num_entries; i++)
         {
-            printf("%s ", entries[i]->d_name);
+            printf("%s\n", entries[i]->d_name);
         }
-        printf("\n");
     }
 
     free(entries);
@@ -197,21 +237,24 @@ void ls(command cmd)
             return;
         }
     }
-
     // iterate arguments for directories
+    int arg_flag = 1;
     int i = 1;
+    char dir_path[MAX_PATH_LEN];
     for (i = 1; i < cmd.num_args; i++)
     {
         if (cmd.args[i][0] != '-')
         {
-            replace_tilde_with_home(cmd.args[i], cmd.internal_args);
-            print_dir_contents(cmd.args[i], a_flag, l_flag);
+            strcpy(dir_path, cmd.args[i]);
+            replace_tilde_with_home(dir_path, cmd.internal_args);
+            print_dir_contents(dir_path, a_flag, l_flag);
+            arg_flag = 0;
         }
     }
 
     // no directories given, so current dir
-    if (i == cmd.num_args)
+    if (arg_flag)
     {
-        print_dir_contents(".", a_flag, l_flag);
+        print_dir_contents("./", a_flag, l_flag);
     }
 }

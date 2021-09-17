@@ -11,10 +11,6 @@ void execute(char *input_cmd, char *shell_home_path)
 
     command cmd;
 
-    // char *tokenised_command[MAX_ARGS_COUNT];
-    // int num_args = 0;
-    // tokenise(input_cmd, WHITESPACE_TOKENS, tokenised_command, &num_args);
-
     tokenise(input_cmd, WHITESPACE_TOKENS, cmd.args, &cmd.num_args);
 
     if (cmd.num_args > 0)
