@@ -5,19 +5,22 @@
 #include "getcwd.h"
 #include "echo.h"
 #include "ls.h"
+#include "pinfo.h"
 
 // refer NUM_BUILTINS in constants.h for size
 char *builtin_cmd_names[] = {
     "cd",
     "pwd",
     "echo",
-    "ls"};
+    "ls",
+    "pinfo"};
 
 void (*builtin_cmds[])(command) = {
     &cd,
     &pwd,
     &echo,
-    &ls};
+    &ls,
+    &pinfo};
 
 int get_builtin_id(char *func_name)
 {

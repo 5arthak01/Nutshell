@@ -21,6 +21,7 @@ void handle_bg_terminate(int sig, siginfo_t *info, void *ucontext)
     char proc_file[MAX_PATH_LEN];
     char proc_name[MAX_PATH_LEN];
     sprintf(proc_file, "/proc/%d/comm", pid);
+    int success_read = 0;
     FILE *f = fopen(proc_file, "r");
     if (f)
     {
@@ -28,8 +29,11 @@ void handle_bg_terminate(int sig, siginfo_t *info, void *ucontext)
         file_size = fread(proc_name, sizeof(char), sizeof(proc_file), f);
         if (file_size > 0)
         {
-            if ('\n' == proc_name[file_size - 1])
+            if (proc_name[file_size - 1] == '\n')
+            {
                 proc_name[file_size - 1] = '\0';
+            }
+            success_read = 1;
         }
         fclose(f);
     }
@@ -39,8 +43,15 @@ void handle_bg_terminate(int sig, siginfo_t *info, void *ucontext)
     pid = waitpid(pid, &wstatus, WNOHANG);
     if (pid > 0)
     {
-        // assumes info->si_code == CLD_EXITED
-        fprintf(stderr, "\n%s with pid %d exited %s\n", proc_name, pid, info->si_status ? "abnormally" : "normally");
+        if (success_read)
+        {
+            // assumes info->si_code == CLD_EXITED
+            fprintf(stderr, "\n%s with pid %d exited %s\n", proc_name, pid, info->si_status ? "abnormally" : "normally");
+        }
+        else
+        {
+            fprintf(stderr, "\nProcess with pid %d exited %s\n", pid, info->si_status ? "abnormally" : "normally");
+        }
         fflush(stderr);
         print_prompt();
     }
