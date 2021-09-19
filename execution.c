@@ -4,11 +4,16 @@
 #include "types.h"
 #include "utils.h"
 #include "builtins.h"
+#include "prompt.h"
 
 #include <signal.h>
 
 void handle_bg_terminate(int sig, siginfo_t *info, void *ucontext)
 {
+    // The child has terminated but not yet reaped
+    // So we first get the name of the process
+    // and then reap it
+
     // get process name from pid
     // NOTE: There does not exist a portable way of doing this, this
     // implementation is limited to Linux (or some UNIX implementations)
@@ -36,11 +41,15 @@ void handle_bg_terminate(int sig, siginfo_t *info, void *ucontext)
     {
         // assumes info->si_code == CLD_EXITED
         fprintf(stderr, "\n%s with pid %d exited %s\n", proc_name, pid, info->si_status ? "abnormally" : "normally");
+        fflush(stderr);
+        // fflush(stdout);
+        print_prompt();
     }
-    // else some error occured
+    // else some error occured with waitpid
+    // or child(ren) still exist
 }
 
-void execute(char *input_cmd, char *shell_home_path)
+void execute(char *input_cmd)
 {
     trim(input_cmd);
 
@@ -53,18 +62,20 @@ void execute(char *input_cmd, char *shell_home_path)
 
         if (id != -1)
         {
-            if (strcmp("cd", cmd.args[0]) == 0 || strcmp("ls", cmd.args[0]) == 0)
-            {
-                cmd.internal_args = shell_home_path;
-            }
             builtin_cmds[id](cmd);
         }
         else
         {
             pid_t pid = fork();
 
-            int bg_process = cmd.args[cmd.num_args - 1][0] == '&';
-
+            // assume fg process
+            int bg_process = 0;
+            if (cmd.args[cmd.num_args - 1][0] == '&')
+            {
+                // set flag and remove trailing &
+                bg_process = 1;
+                cmd.args[cmd.num_args - 1] = '\0';
+            }
             if (pid < 0)
             {
                 perror("Error in forking");
@@ -88,10 +99,15 @@ void execute(char *input_cmd, char *shell_home_path)
 
                 if (bg_process)
                 {
-                    // print the PID of the newly created bg process
                     printf("%d\n", pid);
+
+                    setpgid(pid, 0);
+                    // print the PID of the newly created bg process
                     struct sigaction sa;
                     sa.sa_sigaction = &handle_bg_terminate;
+                    // - allow restarting if blocked for I/O
+                    // - ignore signals if stopped since
+                    // we only care about termination
                     sa.sa_flags = SA_NOCLDSTOP | SA_RESTART | SA_SIGINFO;
                     sigaction(SIGCHLD, &sa, NULL);
                 }
@@ -99,12 +115,17 @@ void execute(char *input_cmd, char *shell_home_path)
                 {
                     // ignore terminal signals
                     // for I/O by child
-                    sigaction(SIGTTIN, SIG_IGN, NULL);
-                    sigaction(SIGTTOU, SIG_IGN, NULL);
+
+                    struct sigaction sa;
+                    sa.sa_handler = SIG_IGN;
+                    sigaction(SIGTTIN, &sa, NULL);
+                    sigaction(SIGTTOU, &sa, NULL);
+                    // signal(SIGTTOU, SIG_IGN);
 
                     // set terminal foreground process group
                     // as the pid of the child
                     // (since we made child pgrp = pid)
+
                     tcsetpgrp(STDIN_FILENO, pid);
 
                     // wait for child
@@ -112,9 +133,10 @@ void execute(char *input_cmd, char *shell_home_path)
                     waitpid(pid, &wstatus, WUNTRACED);
 
                     // restore terminal control
-                    sigaction(SIGTTIN, SIG_DFL, NULL);
-                    sigaction(SIGTTOU, SIG_DFL, NULL);
                     tcsetpgrp(STDIN_FILENO, getpgrp());
+                    sa.sa_handler = SIG_DFL;
+                    sigaction(SIGTTIN, &sa, NULL);
+                    sigaction(SIGTTOU, &sa, NULL);
                 }
             }
         }

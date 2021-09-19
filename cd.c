@@ -15,8 +15,8 @@ void cd(command cmd)
     if (cmd.num_args == 1)
     {
         // no path given, so
-        // go to `shell_home_path`
-        strcpy(new_path, cmd.internal_args);
+        // go to home
+        strcpy(new_path, SHELL_HOME_PATH);
     }
     else if (cmd.num_args == 2)
     {
@@ -32,7 +32,7 @@ void cd(command cmd)
             strcpy(new_path, cmd.args[1]);
         }
 
-        replace_tilde_with_home(new_path, cmd.internal_args);
+        replace_tilde_with_home(new_path);
     }
     else
     {

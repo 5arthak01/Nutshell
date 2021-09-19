@@ -7,4 +7,6 @@
 #define MAX_PATH_LEN 4096   // as according to PATH_MAX in BASH
 #define NUM_BUILTINS 4
 
+char SHELL_HOME_PATH[MAX_PATH_LEN];
+
 #endif

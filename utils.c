@@ -59,7 +59,7 @@ void tokenise(char *str, char *delim, char **tokens, int *num_tokens)
     *num_tokens = i;
 }
 
-void replace_tilde_with_home(char *path, char *shell_home_path)
+void replace_tilde_with_home(char *path)
 {
     /*
     Convenience function to replace "~"
@@ -71,7 +71,7 @@ void replace_tilde_with_home(char *path, char *shell_home_path)
         // save the relative path, without "~"
         strcpy(temp, path + 1);
         // Store absolute path of shell home
-        strcpy(path, shell_home_path);
+        strcpy(path, SHELL_HOME_PATH);
         // Append relative path
         strcat(path, temp);
     }

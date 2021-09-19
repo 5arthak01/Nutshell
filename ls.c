@@ -246,7 +246,7 @@ void ls(command cmd)
         if (cmd.args[i][0] != '-')
         {
             strcpy(dir_path, cmd.args[i]);
-            replace_tilde_with_home(dir_path, cmd.internal_args);
+            replace_tilde_with_home(dir_path);
             print_dir_contents(dir_path, a_flag, l_flag);
             arg_flag = 0;
         }

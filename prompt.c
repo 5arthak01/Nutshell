@@ -2,7 +2,7 @@
 #include "constants.h"
 #include <pwd.h>
 
-void replace_home_with_tilde(char *path, char *home_path)
+void replace_home_with_tilde(char *path)
 {
     /*
     Replaces the absolute path of the 
@@ -14,8 +14,8 @@ void replace_home_with_tilde(char *path, char *home_path)
     // so saves O(m+n) computation
 
     int len_path = strlen(path);
-    int len_home_path = strlen(home_path);
-    if (len_path >= len_home_path && strncmp(home_path, path, len_home_path) == 0)
+    int len_home_path = strlen(SHELL_HOME_PATH);
+    if (len_path >= len_home_path && strncmp(SHELL_HOME_PATH, path, len_home_path) == 0)
     {
         // path contains home, so replacement
         char *new_path = malloc(sizeof(char) * (len_path - len_home_path + 5));
@@ -26,7 +26,7 @@ void replace_home_with_tilde(char *path, char *home_path)
     }
 }
 
-void print_prompt(char *home_path)
+void print_prompt()
 {
     /*
     Prints shell prompt 
@@ -48,7 +48,7 @@ void print_prompt(char *home_path)
 
     // get path
     char *pwd_path = getcwd(NULL, 0);
-    replace_home_with_tilde(pwd_path, home_path);
+    replace_home_with_tilde(pwd_path);
 
     printf("<%s@%s:%s> ", username, hostname, pwd_path);
     fflush(stdout);

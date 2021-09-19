@@ -8,6 +8,6 @@ void trim(char *str);
 
 void tokenise(char *str, char *delim, char **tokens, int *num_tokens);
 
-void replace_tilde_with_home(char *path, char *shell_home_path);
+void replace_tilde_with_home(char *path);
 
 #endif

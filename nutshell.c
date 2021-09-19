@@ -9,11 +9,11 @@ int main()
 {
     char *input;
     size_t input_len;
-    char *SHELL_HOME_PATH = getcwd(NULL, 0);
+    getcwd(SHELL_HOME_PATH, MAX_PATH_LEN);
 
     while (1)
     {
-        print_prompt(SHELL_HOME_PATH);
+        print_prompt();
 
         // read input
         input = NULL;
@@ -35,7 +35,7 @@ int main()
             char *command = strtok(input, ";");
             while (command)
             {
-                execute(command, SHELL_HOME_PATH);
+                execute(command);
                 // go to next command
                 command = strtok(NULL, ";");
             }
@@ -43,7 +43,6 @@ int main()
     }
 
     free(input);
-    free(SHELL_HOME_PATH);
 
     return 0;
 }
