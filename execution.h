@@ -3,4 +3,6 @@
 
 void execute(char *input_cmd);
 
+void execute_tokenised_cmd(command cmd);
+
 #endif

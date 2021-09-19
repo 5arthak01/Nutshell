@@ -24,6 +24,7 @@ int main()
             {
                 // getline not at EOF, so other error
                 perror("Error while taking input");
+                free(input);
                 exit(EXIT_FAILURE);
             }
         }

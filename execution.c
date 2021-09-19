@@ -61,13 +61,8 @@ void handle_bg_terminate(int sig, siginfo_t *info, void *ucontext)
     // pid==0 - child(ren) have not changed state
 }
 
-void execute(char *input_cmd)
+void execute_tokenised_cmd(command cmd)
 {
-    trim(input_cmd);
-
-    command cmd;
-    tokenise(input_cmd, WHITESPACE_TOKENS, cmd.args, &cmd.num_args);
-
     if (cmd.num_args > 0)
     {
         int id = get_builtin_id(cmd.args[0]);
@@ -158,4 +153,14 @@ void execute(char *input_cmd)
             }
         }
     }
+}
+
+void execute(char *input_cmd)
+{
+    trim(input_cmd);
+
+    command cmd;
+    tokenise(input_cmd, WHITESPACE_TOKENS, cmd.args, &cmd.num_args);
+
+    execute_tokenised_cmd(cmd);
 }

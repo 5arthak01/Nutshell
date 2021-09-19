@@ -6,6 +6,7 @@
 #include "echo.h"
 #include "ls.h"
 #include "pinfo.h"
+#include "repeat.h"
 
 // refer NUM_BUILTINS in constants.h for size
 char *builtin_cmd_names[] = {
@@ -13,14 +14,16 @@ char *builtin_cmd_names[] = {
     "pwd",
     "echo",
     "ls",
-    "pinfo"};
+    "pinfo",
+    "repeat"};
 
 void (*builtin_cmds[])(command) = {
     &cd,
     &pwd,
     &echo,
     &ls,
-    &pinfo};
+    &pinfo,
+    &repeat};
 
 int get_builtin_id(char *func_name)
 {
