@@ -77,6 +77,7 @@ void execute(char *input_cmd)
                 bg_process = 1;
                 cmd.args[cmd.num_args - 1] = '\0';
             }
+
             if (pid < 0)
             {
                 perror("Error in forking");
@@ -85,6 +86,7 @@ void execute(char *input_cmd)
             else if (pid == 0)
             {
                 // place child in new group
+                // with gid=pid
                 setpgid(0, 0);
                 if (execvp(cmd.args[0], cmd.args) == -1)
                 {
@@ -98,11 +100,14 @@ void execute(char *input_cmd)
             {
                 // inside parent, now pid is of child
 
+                // ensure group of child process
+                // is new, equal to its pid
+                setpgid(pid, 0);
+
                 if (bg_process)
                 {
                     printf("%d\n", pid);
 
-                    setpgid(pid, 0);
                     // print the PID of the newly created bg process
                     struct sigaction sa;
                     sa.sa_sigaction = &handle_bg_terminate;

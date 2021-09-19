@@ -105,9 +105,7 @@ void print_dir_contents(char *directory, int a_flag, int l_flag)
         {
             print_data[i].valid = 1;
 
-            strcpy(path, directory);
-            strcat(path, "/");
-            strcat(path, entries[i]->d_name);
+            sprintf(path, "%s/%s", directory, entries[i]->d_name);
 
             // Get information about the entry
             struct stat st;
