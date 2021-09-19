@@ -20,7 +20,7 @@ void handle_bg_terminate(int sig, siginfo_t *info, void *ucontext)
     pid_t pid = info->si_pid;
     char proc_file[MAX_PATH_LEN];
     char proc_name[MAX_PATH_LEN];
-    sprintf(proc_file, "/proc/%d/cmdline", pid);
+    sprintf(proc_file, "/proc/%d/comm", pid);
     FILE *f = fopen(proc_file, "r");
     if (f)
     {
@@ -42,11 +42,12 @@ void handle_bg_terminate(int sig, siginfo_t *info, void *ucontext)
         // assumes info->si_code == CLD_EXITED
         fprintf(stderr, "\n%s with pid %d exited %s\n", proc_name, pid, info->si_status ? "abnormally" : "normally");
         fflush(stderr);
-        // fflush(stdout);
         print_prompt();
     }
-    // else some error occured with waitpid
-    // or child(ren) still exist
+    // else
+    // pid<0 - some error occured with waitpid
+    // which means child does not exist
+    // pid==0 - child(ren) have not changed state
 }
 
 void execute(char *input_cmd)
